@@ -5,21 +5,26 @@ const path = require('path');
 const cors = require('cors');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const WHEELS_FILE = path.join(__dirname, 'wheels.json');
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(session({
-  secret: 'spin-wheel-secret', // Change in production
+  secret: 'spin-wheel-secret',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false } // Set to true for HTTPS
+  cookie: { secure: false }
 }));
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, "public")));
 
-// Load wheels from JSON
+// Root route (FIX)
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Load wheels
 function loadWheels() {
   if (fs.existsSync(WHEELS_FILE)) {
     return JSON.parse(fs.readFileSync(WHEELS_FILE, 'utf8'));
@@ -27,7 +32,7 @@ function loadWheels() {
   return {};
 }
 
-// Save wheels to JSON
+// Save wheels
 function saveWheels(wheels) {
   fs.writeFileSync(WHEELS_FILE, JSON.stringify(wheels, null, 2));
 }
@@ -41,7 +46,7 @@ function requireAuth(req, res, next) {
 // Routes
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
-  // Basic auth (replace with real DB)
+
   if (username === 'admin' && password === 'password') {
     req.session.user = username;
     res.json({ success: true });
@@ -85,4 +90,5 @@ app.delete('/wheels', requireAuth, (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// Start server
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
