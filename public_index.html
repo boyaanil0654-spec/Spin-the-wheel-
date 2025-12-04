@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spin the Wheel</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="auth" class="auth">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button id="loginBtn">Login</button>
+  </div>
+  <div id="app" class="hidden">
+    <h1>Customizable Spin the Wheel</h1>
+    <div class="container">
+      <canvas id="wheel" width="400" height="400"></canvas>
+      <div class="controls">
+        <button id="spinBtn">Spin</button>
+        <button id="settingsBtn">Settings</button>
+        <button id="exportBtn">Export</button>
+        <input type="file" id="importFile" accept=".json">
+        <button id="importBtn">Import</button>
+        <button id="logoutBtn">Logout</button>
+      </div>
+      <div id="result" class="result hidden"></div>
+      <div id="history" class="history">
+        <h3>Spin History</h3>
+        <ul id="historyList"></ul>
+      </div>
+    </div>
+    <div id="settings" class="settings hidden">
+      <h2>Settings</h2>
+      <label>Prevent Repeats: <input type="checkbox" id="preventRepeats"></label>
+      <div id="segments">
+        <h3>Segments</h3>
+        <button id="addSegment">Add Segment</button>
+        <div id="segmentList"></div>
+      </div>
+      <button id="saveSettings">Save</button>
+      <button id="closeSettings">Close</button>
+    </div>
+  </div>
+  <script src="wheel.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
