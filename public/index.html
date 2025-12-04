@@ -7,13 +7,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="auth" class="auth">
-    <h2>Login</h2>
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
-    <button id="loginBtn">Login</button>
-  </div>
-  <div id="app" class="hidden">
+  <div id="app">
     <h1>Customizable Spin the Wheel</h1>
     <div class="container">
       <canvas id="wheel" width="400" height="400"></canvas>
@@ -23,7 +17,6 @@
         <button id="exportBtn">Export</button>
         <input type="file" id="importFile" accept=".json">
         <button id="importBtn">Import</button>
-        <button id="logoutBtn">Logout</button>
       </div>
       <div id="result" class="result hidden"></div>
       <div id="history" class="history">
