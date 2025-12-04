@@ -22,7 +22,7 @@ class SpinWheel {
       this.ctx.moveTo(centerX, centerY);
       this.ctx.arc(centerX, centerY, radius, startAngle, endAngle);
       this.ctx.closePath();
-      this.ctx.fillStyle = seg.color;
+      this.ctx.fillStyle = seg.disabled ? '#ccc' : seg.color; // Gray out disabled
       this.ctx.fill();
       this.ctx.stroke();
 
@@ -46,13 +46,17 @@ class SpinWheel {
     this.ctx.fill();
   }
 
-  spin(duration = 3000, onEnd) {
+  spin(duration = 3000, onEnd, preventRepeats = false) {
     if (this.spinning) return;
     this.spinning = true;
     this.onSpinEnd = onEnd;
     const startTime = Date.now();
     const startAngle = this.angle;
     const totalRotation = Math.PI * 2 * 5 + Math.random() * Math.PI * 2; // Random spin
+
+    // Filter enabled segments if prevent repeats
+    const activeSegments = preventRepeats ? this.segments.filter(s => !s.disabled) : this.segments;
+    if (activeSegments.length === 0) return; // No segments to spin
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
@@ -70,10 +74,12 @@ class SpinWheel {
     animate();
   }
 
-  getWinningSegment() {
-    const anglePerSegment = (2 * Math.PI) / this.segments.length;
+  getWinningSegment(preventRepeats = false) {
+    const activeSegments = preventRepeats ? this.segments.filter(s => !s.disabled) : this.segments;
+    if (activeSegments.length === 0) return null;
+    const anglePerSegment = (2 * Math.PI) / this.segments.length; // Use full length for angle calc
     const normalizedAngle = (this.angle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
     const winningIndex = Math.floor((2 * Math.PI - normalizedAngle) / anglePerSegment) % this.segments.length;
-    return this.segments[winningIndex];
+    return this.segments[winningIndex]; // Return from full list, but check if disabled later
   }
 }
