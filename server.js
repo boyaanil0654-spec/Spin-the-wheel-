@@ -1,5 +1,4 @@
 const express = require('express');
-const session = require('express-session');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
@@ -11,77 +10,40 @@ const WHEELS_FILE = path.join(__dirname, 'wheels.json');
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(session({
-  secret: 'spin-wheel-secret', // Change in production
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false } // Set to true for HTTPS
-}));
 app.use(express.static('public'));
 
-// Load wheels from JSON
-function loadWheels() {
+// Load wheel from JSON (single global config)
+function loadWheel() {
   if (fs.existsSync(WHEELS_FILE)) {
     return JSON.parse(fs.readFileSync(WHEELS_FILE, 'utf8'));
   }
-  return {};
+  return { segments: [], history: [], preventRepeats: false };
 }
 
-// Save wheels to JSON
-function saveWheels(wheels) {
-  fs.writeFileSync(WHEELS_FILE, JSON.stringify(wheels, null, 2));
+// Save wheel to JSON
+function saveWheel(wheel) {
+  fs.writeFileSync(WHEELS_FILE, JSON.stringify(wheel, null, 2));
 }
 
-// Auth middleware
-function requireAuth(req, res, next) {
-  if (req.session.user) next();
-  else res.status(401).json({ error: 'Unauthorized' });
-}
-
-// Routes
-app.post('/login', (req, res) => {
-  const { username, password } = req.body;
-  // Basic auth (replace with real DB)
-  if (username === 'admin' && password === 'password') {
-    req.session.user = username;
-    res.json({ success: true });
-  } else {
-    res.status(401).json({ error: 'Invalid credentials' });
-  }
+// Routes (now public, no auth)
+app.get('/wheels', (req, res) => {
+  res.json(loadWheel());
 });
 
-app.post('/logout', (req, res) => {
-  req.session.destroy();
+app.post('/wheels', (req, res) => {
+  saveWheel(req.body);
   res.json({ success: true });
 });
 
-app.get('/wheels', requireAuth, (req, res) => {
-  const wheels = loadWheels();
-  res.json(wheels[req.session.user] || { segments: [], history: [] });
-});
-
-app.post('/wheels', requireAuth, (req, res) => {
-  const wheels = loadWheels();
-  wheels[req.session.user] = req.body;
-  saveWheels(wheels);
+app.put('/wheels', (req, res) => {
+  const current = loadWheel();
+  const updated = { ...current, ...req.body };
+  saveWheel(updated);
   res.json({ success: true });
 });
 
-app.put('/wheels', requireAuth, (req, res) => {
-  const wheels = loadWheels();
-  if (wheels[req.session.user]) {
-    wheels[req.session.user] = { ...wheels[req.session.user], ...req.body };
-    saveWheels(wheels);
-    res.json({ success: true });
-  } else {
-    res.status(404).json({ error: 'Wheel not found' });
-  }
-});
-
-app.delete('/wheels', requireAuth, (req, res) => {
-  const wheels = loadWheels();
-  delete wheels[req.session.user];
-  saveWheels(wheels);
+app.delete('/wheels', (req, res) => {
+  saveWheel({ segments: [], history: [], preventRepeats: false }); // Reset to default
   res.json({ success: true });
 });
 
